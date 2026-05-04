@@ -10,7 +10,9 @@ URL = "https://sojkgoaefkgtnxmhkptz.supabase.co"
 KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvamtnb2FlZmtndG54bWhrcHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTYxMjIsImV4cCI6MjA5MDE5MjEyMn0.Ev1EmLOpdcVzj6Jcpsuv9m7z_3ybYowodU2yc7abpyQ"
 supabase = create_client(URL, KEY)
 
-st.set_page_config(page_title="Precision Tibia Case Matcher", layout="wide", initial_sidebar_state="collapsed")
+# Sidebar collapsed on landing, expanded on app
+sidebar_state = "collapsed" if st.session_state.get("page", "landing") == "landing" else "expanded"
+st.set_page_config(page_title="Precision Tibia Case Matcher", layout="wide", initial_sidebar_state=sidebar_state)
 
 if "page" not in st.session_state:
     st.session_state.page = "landing"
@@ -25,10 +27,7 @@ if st.session_state.page == "landing":
     .main .block-container { padding-top: 0 !important; }
     [data-testid="stAppViewContainer"] { background: #FAFAF8 !important; }
     section[data-testid="stSidebar"] { display: none !important; }
-    div[data-testid="stButton"] {
-        display: flex; justify-content: center;
-        margin-top: 20px; margin-bottom: 40px;
-    }
+    div[data-testid="stButton"] { display: flex; justify-content: center; margin-top: 20px; margin-bottom: 40px; }
     div[data-testid="stButton"] > button {
         background: #111 !important; color: white !important;
         border: none !important; border-radius: 100px !important;
@@ -39,7 +38,6 @@ if st.session_state.page == "landing":
     </style>
     """, unsafe_allow_html=True)
 
-    # Load the separate HTML file
     html_path = os.path.join(os.path.dirname(__file__), "landing.html")
     with open(html_path, "r") as f:
         landing_html = f.read()
@@ -54,7 +52,11 @@ if st.session_state.page == "landing":
 else:
     st.markdown("""
     <style>
-    [data-testid="stAppViewContainer"] { background: #0a0a0f; }
+    #MainMenu, footer { display: none !important; }
+    [data-testid="stAppViewContainer"] { background: #0d0d14; }
+    [data-testid="stSidebar"] { background: #13131f; border-right: 1px solid #1e1e2e; }
+    /* Prevent title from being clipped */
+    .block-container { padding-top: 2rem !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -194,6 +196,7 @@ else:
             height=460, margin=dict(t=20,b=50,l=60,r=20), dragmode=False)
         return fig, dict(displayModeBar=False)
 
+    # ── SIDEBAR ───────────────────────────────────────────────────────────────
     st.sidebar.markdown("## 🏥 Patient Profile")
     if st.sidebar.button("← Back to Home"):
         st.session_state.page = "landing"
@@ -211,9 +214,15 @@ else:
     if in_age > 18:
         st.sidebar.info("ℹ️ Growth plate width is not factored into matching for patients over 18.")
 
-    st.title("🏥 Precision Tibia Case Matcher")
+    st.sidebar.markdown("---")
+    analyze = st.sidebar.button("🔍 Analyze Similar Cases", use_container_width=True)
 
-    if st.sidebar.button("Analyze Similar Cases"):
+    # ── MAIN AREA ─────────────────────────────────────────────────────────────
+    st.title("🏥 Precision Tibia Case Matcher")
+    st.caption("Set the patient profile in the sidebar and click **Analyze Similar Cases** to begin.")
+    st.divider()
+
+    if analyze:
         try:
             response = supabase.table("tibia_fractures1").select("*").execute()
             df = pd.DataFrame(response.data)
