@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 from supabase import create_client
@@ -13,111 +14,137 @@ st.set_page_config(page_title="Precision Tibia Case Matcher", layout="wide", ini
 if "page" not in st.session_state:
     st.session_state.page = "landing"
 
-LANDING_HTML = """
+if st.session_state.page == "landing":
+
+    st.markdown("""
+    <style>
+    #MainMenu, header, footer { display: none !important; }
+    .block-container { padding: 0 !important; max-width: 100% !important; }
+    .main .block-container { padding-top: 0 !important; }
+    [data-testid="stAppViewContainer"] { background: #FAFAF8 !important; }
+    section[data-testid="stSidebar"] { display: none !important; }
+    iframe { display: block; border: none; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    LANDING = """<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-#MainMenu, header, footer, [data-testid="stToolbar"] { visibility: hidden; }
-[data-testid="stAppViewContainer"] { background: #FAFAF8; }
-.block-container { padding: 0 !important; max-width: 100% !important; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: "DM Sans", sans-serif; background: #FAFAF8; color: #1a1a1a; }
+html, body { width: 100%; background: #FAFAF8; font-family: "DM Sans", sans-serif; color: #1a1a1a; }
 
 .nav {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 28px 64px; border-bottom: 1px solid #E8E8E4;
-    background: #FAFAF8; position: sticky; top: 0; z-index: 100;
+    padding: 24px 60px; border-bottom: 1px solid #E8E8E4; background: #FAFAF8;
 }
-.nav-logo { font-family: "Playfair Display", serif; font-size: 18px; font-weight: 700; color: #1a1a1a; }
+.nav-logo { font-family: "Playfair Display", serif; font-size: 20px; font-weight: 700; }
 .nav-logo span { color: #2563EB; }
-.nav-tag { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: #888; }
+.nav-tag { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #999; }
 
 .hero {
     display: grid; grid-template-columns: 1fr 1fr;
-    min-height: 88vh; max-width: 1400px; margin: 0 auto;
-    padding: 0 64px; align-items: center; gap: 80px;
+    padding: 72px 60px; align-items: center; gap: 72px;
 }
-.hero-left { animation: fadeUp 0.8s ease both; }
-.hero-tag {
+.tag {
     display: inline-flex; align-items: center; gap: 8px;
     background: #EFF6FF; color: #2563EB; font-size: 11px; font-weight: 600;
     letter-spacing: 1.5px; text-transform: uppercase;
-    padding: 6px 14px; border-radius: 100px; margin-bottom: 28px;
+    padding: 6px 14px; border-radius: 100px; margin-bottom: 24px;
 }
-.hero-tag::before { content: ""; width: 6px; height: 6px; background: #2563EB; border-radius: 50%; }
-.hero-title {
-    font-family: "Playfair Display", serif; font-size: clamp(42px, 5vw, 68px);
-    font-weight: 700; line-height: 1.08; letter-spacing: -1.5px;
-    color: #111; margin-bottom: 24px;
+.tag-dot { width: 6px; height: 6px; background: #2563EB; border-radius: 50%; }
+h1 {
+    font-family: "Playfair Display", serif; font-size: 58px;
+    font-weight: 700; line-height: 1.09; letter-spacing: -2px;
+    color: #111; margin-bottom: 20px;
 }
-.hero-title em { font-style: italic; color: #2563EB; }
-.hero-desc { font-size: 17px; font-weight: 300; line-height: 1.75; color: #555; max-width: 480px; margin-bottom: 44px; }
-.hero-cta-row { display: flex; align-items: center; gap: 20px; }
-.cta-btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: #111; color: white; font-family: "DM Sans", sans-serif;
-    font-size: 15px; font-weight: 500; padding: 16px 32px;
-    border-radius: 100px; border: none; cursor: pointer; transition: all 0.2s;
-}
-.cta-btn:hover { background: #2563EB; transform: translateY(-1px); }
-.cta-secondary { font-size: 14px; color: #888; }
+h1 em { font-style: italic; color: #2563EB; }
+.desc { font-size: 16px; font-weight: 300; line-height: 1.75; color: #666; margin-bottom: 32px; }
+.hint { font-size: 13px; color: #bbb; margin-top: 12px; }
 
-.visual-card {
+.card {
     background: white; border: 1px solid #E8E8E4; border-radius: 20px;
-    padding: 32px; box-shadow: 0 8px 40px rgba(0,0,0,0.06);
-    animation: fadeUp 0.8s ease 0.15s both;
+    padding: 28px; box-shadow: 0 8px 40px rgba(0,0,0,0.06);
 }
-.card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
-.card-dot { width: 10px; height: 10px; border-radius: 50%; }
-.card-title { font-size: 12px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: #888; }
-.treatment-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 0; border-bottom: 1px solid #F0F0EC;
-}
-.treatment-row:last-child { border-bottom: none; }
-.treatment-name { font-size: 14px; font-weight: 500; color: #333; }
-.treatment-bar-wrap { flex: 1; margin: 0 16px; height: 6px; background: #F0F0EC; border-radius: 100px; overflow: hidden; }
-.treatment-bar { height: 100%; border-radius: 100px; }
-.treatment-pct { font-size: 13px; font-weight: 600; color: #111; min-width: 36px; text-align: right; }
+.card-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.cdot { width: 9px; height: 9px; border-radius: 50%; background: #22C55E; }
+.ctitle { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: #888; }
+.row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #F4F4F0; }
+.row:last-child { border-bottom: none; }
+.rname { font-size: 13px; font-weight: 500; color: #444; min-width: 150px; }
+.bwrap { flex: 1; height: 5px; background: #F0F0EC; border-radius: 100px; overflow: hidden; margin: 0 12px; }
+.bar { height: 100%; border-radius: 100px; }
+.rpct { font-size: 12px; font-weight: 600; color: #111; min-width: 32px; text-align: right; }
 
 .stats {
-    max-width: 1400px; margin: 0 auto; padding: 80px 64px;
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 48px;
-    border-top: 1px solid #E8E8E4;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    padding: 60px 60px; gap: 40px; border-top: 1px solid #E8E8E4;
 }
-.stat-num {
-    font-family: "Playfair Display", serif; font-size: 52px; font-weight: 700;
+.snum {
+    font-family: "Playfair Display", serif; font-size: 48px; font-weight: 700;
     color: #111; letter-spacing: -2px; line-height: 1; margin-bottom: 8px;
 }
-.stat-num span { color: #2563EB; }
-.stat-label { font-size: 13px; color: #888; line-height: 1.5; }
+.snum b { color: #2563EB; }
+.slabel { font-size: 13px; color: #999; line-height: 1.6; }
 
-.features { background: #111; padding: 100px 64px; }
-.features-inner { max-width: 1400px; margin: 0 auto; }
-.features-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 64px; }
-.features-title { font-family: "Playfair Display", serif; font-size: 44px; font-weight: 700; color: white; letter-spacing: -1px; line-height: 1.1; }
-.features-title em { font-style: italic; color: #60A5FA; }
-.features-sub { font-size: 14px; color: #666; max-width: 260px; line-height: 1.6; text-align: right; }
-.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
-.feature-card { background: #1a1a1a; padding: 40px 36px; transition: background 0.2s; }
-.feature-card:first-child { border-radius: 16px 2px 2px 2px; }
-.feature-card:nth-child(3) { border-radius: 2px 16px 2px 2px; }
-.feature-card:nth-child(4) { border-radius: 2px 2px 2px 16px; }
-.feature-card:last-child { border-radius: 2px 2px 16px 2px; }
-.feature-card:hover { background: #222; }
-.feature-icon { font-size: 24px; margin-bottom: 20px; }
-.feature-name { font-size: 16px; font-weight: 600; color: white; margin-bottom: 10px; }
-.feature-desc { font-size: 13px; color: #666; line-height: 1.65; }
+.features { background: #111; padding: 80px 60px; }
+.fhdr { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
+.ftitle { font-family: "Playfair Display", serif; font-size: 40px; font-weight: 700; color: white; line-height: 1.1; letter-spacing: -1px; }
+.ftitle em { font-style: italic; color: #60A5FA; }
+.fsub { font-size: 13px; color: #555; max-width: 220px; line-height: 1.65; text-align: right; }
+.fgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.fc { background: #1a1a1a; padding: 32px 28px; }
+.fc:nth-child(1) { border-radius: 14px 2px 2px 2px; }
+.fc:nth-child(3) { border-radius: 2px 14px 2px 2px; }
+.fc:nth-child(4) { border-radius: 2px 2px 2px 14px; }
+.fc:nth-child(6) { border-radius: 2px 2px 14px 2px; }
+.ficon { font-size: 20px; margin-bottom: 14px; }
+.fname { font-size: 14px; font-weight: 600; color: white; margin-bottom: 8px; }
+.fdesc { font-size: 12px; color: #555; line-height: 1.65; }
 
 .footer {
-    max-width: 1400px; margin: 0 auto; padding: 40px 64px;
     display: flex; justify-content: space-between; align-items: center;
-    border-top: 1px solid #E8E8E4;
+    padding: 32px 60px; border-top: 1px solid #E8E8E4; background: #FAFAF8;
 }
-.footer-logo { font-family: "Playfair Display", serif; font-size: 15px; font-weight: 700; color: #888; }
-.footer-note { font-size: 12px; color: #aaa; }
-
-@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.flogo { font-family: "Playfair Display", serif; font-size: 14px; color: #bbb; font-weight: 700; }
+.fnote { font-size: 11px; color: #ccc; }
 </style>
+<script>
+// Strip Streamlit padding from parent document
+(function() {
+    function fixParent() {
+        try {
+            var p = window.parent.document;
+            var styles = [
+                '[data-testid="stAppViewContainer"] > section { padding-top: 0 !important; }',
+                '.main .block-container { padding-top: 0 !important; padding-bottom: 0 !important; }',
+                '.block-container { padding: 0 !important; }',
+                'iframe { margin: 0 !important; }'
+            ];
+            var el = p.getElementById('st-fix');
+            if (!el) {
+                el = p.createElement('style');
+                el.id = 'st-fix';
+                p.head.appendChild(el);
+            }
+            el.textContent = styles.join(' ');
+        } catch(e) {}
+    }
+    fixParent();
+    setTimeout(fixParent, 100);
+    setTimeout(fixParent, 500);
+})();
+
+function launch() {
+    // Post message to parent to trigger Streamlit button
+    window.parent.postMessage({type: 'streamlit:setComponentValue', value: true}, '*');
+}
+</script>
+</head>
+<body>
 
 <div class="nav">
     <div class="nav-logo">Tibia<span>Matcher</span></div>
@@ -125,141 +152,78 @@ body { font-family: "DM Sans", sans-serif; background: #FAFAF8; color: #1a1a1a; 
 </div>
 
 <div class="hero">
-    <div class="hero-left">
-        <div class="hero-tag">Orthopaedic Intelligence</div>
-        <h1 class="hero-title">Find the right<br>treatment, <em>faster.</em></h1>
-        <p class="hero-desc">A data-driven case matcher for tibia fractures. Enter a patient profile and instantly surface the five most similar historical cases — with treatment success rates, clinical comparisons, and visual insights.</p>
-        <div class="hero-cta-row">
-            <button class="cta-btn" onclick="document.getElementById('launch-trigger').click()">
-                Launch Tool &#8594;
-            </button>
-            <span class="cta-secondary">2,800+ historical cases</span>
-        </div>
+    <div>
+        <div class="tag"><span class="tag-dot"></span>Orthopaedic Intelligence</div>
+        <h1>Find the right<br>treatment, <em>faster.</em></h1>
+        <p class="desc">A data-driven case matcher for tibia fractures. Enter a patient profile and instantly surface the five most similar historical cases — with treatment success rates, clinical comparisons, and visual insights.</p>
+        <p class="hint">&#8595; Scroll down and click Launch Tool to begin</p>
     </div>
-    <div class="hero-right">
-        <div class="visual-card">
-            <div class="card-header">
-                <div class="card-dot" style="background:#22C55E"></div>
-                <span class="card-title">Treatment Success Rates</span>
-            </div>
-            <div class="treatment-row">
-                <span class="treatment-name">Cast</span>
-                <div class="treatment-bar-wrap"><div class="treatment-bar" style="width:82%;background:#22C55E"></div></div>
-                <span class="treatment-pct">82%</span>
-            </div>
-            <div class="treatment-row">
-                <span class="treatment-name">Closed Reduction</span>
-                <div class="treatment-bar-wrap"><div class="treatment-bar" style="width:76%;background:#3B82F6"></div></div>
-                <span class="treatment-pct">76%</span>
-            </div>
-            <div class="treatment-row">
-                <span class="treatment-name">K-Wire Fixation</span>
-                <div class="treatment-bar-wrap"><div class="treatment-bar" style="width:73%;background:#8B5CF6"></div></div>
-                <span class="treatment-pct">73%</span>
-            </div>
-            <div class="treatment-row">
-                <span class="treatment-name">Nail (Intramedullary)</span>
-                <div class="treatment-bar-wrap"><div class="treatment-bar" style="width:61%;background:#F59E0B"></div></div>
-                <span class="treatment-pct">61%</span>
-            </div>
-            <div class="treatment-row">
-                <span class="treatment-name">ORIF</span>
-                <div class="treatment-bar-wrap"><div class="treatment-bar" style="width:54%;background:#F97316"></div></div>
-                <span class="treatment-pct">54%</span>
-            </div>
-            <div class="treatment-row">
-                <span class="treatment-name">External Fixation</span>
-                <div class="treatment-bar-wrap"><div class="treatment-bar" style="width:47%;background:#EF4444"></div></div>
-                <span class="treatment-pct">47%</span>
-            </div>
+    <div>
+        <div class="card">
+            <div class="card-hdr"><div class="cdot"></div><span class="ctitle">Treatment Success Rates</span></div>
+            <div class="row"><span class="rname">Cast</span><div class="bwrap"><div class="bar" style="width:82%;background:#22C55E"></div></div><span class="rpct">82%</span></div>
+            <div class="row"><span class="rname">Closed Reduction</span><div class="bwrap"><div class="bar" style="width:76%;background:#3B82F6"></div></div><span class="rpct">76%</span></div>
+            <div class="row"><span class="rname">K-Wire Fixation</span><div class="bwrap"><div class="bar" style="width:73%;background:#8B5CF6"></div></div><span class="rpct">73%</span></div>
+            <div class="row"><span class="rname">Nail (Intramedullary)</span><div class="bwrap"><div class="bar" style="width:61%;background:#F59E0B"></div></div><span class="rpct">61%</span></div>
+            <div class="row"><span class="rname">ORIF</span><div class="bwrap"><div class="bar" style="width:54%;background:#F97316"></div></div><span class="rpct">54%</span></div>
+            <div class="row"><span class="rname">External Fixation</span><div class="bwrap"><div class="bar" style="width:47%;background:#EF4444"></div></div><span class="rpct">47%</span></div>
         </div>
     </div>
 </div>
 
 <div class="stats">
-    <div>
-        <div class="stat-num">2<span>,800+</span></div>
-        <div class="stat-label">Historical cases<br>in the database</div>
-    </div>
-    <div>
-        <div class="stat-num">6</div>
-        <div class="stat-label">Treatment types<br>compared simultaneously</div>
-    </div>
-    <div>
-        <div class="stat-num">5</div>
-        <div class="stat-label">Weighted clinical<br>similarity factors</div>
-    </div>
-    <div>
-        <div class="stat-num"><span>&lt;</span>2s</div>
-        <div class="stat-label">Time to generate<br>a full case analysis</div>
-    </div>
+    <div><div class="snum">2<b>,800+</b></div><div class="slabel">Historical cases<br>in the database</div></div>
+    <div><div class="snum">6</div><div class="slabel">Treatment types<br>compared simultaneously</div></div>
+    <div><div class="snum">5</div><div class="slabel">Weighted clinical<br>similarity factors</div></div>
+    <div><div class="snum"><b>&lt;</b>2s</div><div class="slabel">Time to generate<br>a full case analysis</div></div>
 </div>
 
 <div class="features">
-    <div class="features-inner">
-        <div class="features-header">
-            <h2 class="features-title">Built for<br><em>clinical precision.</em></h2>
-            <p class="features-sub">Every design decision prioritises how surgeons actually think about fracture management.</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">&#9878;</div>
-                <div class="feature-name">Weighted Similarity</div>
-                <div class="feature-desc">AP angulation and infection history carry more weight than age or weight — because clinically, they should.</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">&#129456;</div>
-                <div class="feature-name">Age-Aware Matching</div>
-                <div class="feature-desc">Growth plate data is automatically excluded from the similarity score for patients over 18.</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">&#128375;</div>
-                <div class="feature-name">Radar Comparison</div>
-                <div class="feature-desc">All six treatments visualised at once. See which option has the best success profile for this specific patient.</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">&#128301;</div>
-                <div class="feature-name">Patient Universe</div>
-                <div class="feature-desc">Scatter plot shows where your patient sits relative to all historical cases — red clusters signal high risk instantly.</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">&#127919;</div>
-                <div class="feature-name">Honest Thresholds</div>
-                <div class="feature-desc">If no genuinely similar cases exist, the tool says so — rather than surfacing misleading matches.</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">&#128202;</div>
-                <div class="feature-name">Tiered Confidence</div>
-                <div class="feature-desc">Four confidence levels from Strong Recommendation to Not Recommended, based on historical success rates.</div>
-            </div>
-        </div>
+    <div class="fhdr">
+        <h2 class="ftitle">Built for<br><em>clinical precision.</em></h2>
+        <p class="fsub">Every design decision prioritises how surgeons actually think about fracture management.</p>
+    </div>
+    <div class="fgrid">
+        <div class="fc"><div class="ficon">&#9878;</div><div class="fname">Weighted Similarity</div><div class="fdesc">AP angulation and infection history carry more weight — because clinically, they should.</div></div>
+        <div class="fc"><div class="ficon">&#129456;</div><div class="fname">Age-Aware Matching</div><div class="fdesc">Growth plate data automatically excluded for patients over 18.</div></div>
+        <div class="fc"><div class="ficon">&#128375;</div><div class="fname">Radar Comparison</div><div class="fdesc">All six treatments visualised at once on an interactive radar chart.</div></div>
+        <div class="fc"><div class="ficon">&#128301;</div><div class="fname">Patient Universe</div><div class="fdesc">See exactly where your patient sits relative to all historical cases.</div></div>
+        <div class="fc"><div class="ficon">&#127919;</div><div class="fname">Honest Thresholds</div><div class="fdesc">No similar cases found? The tool says so, rather than showing bad matches.</div></div>
+        <div class="fc"><div class="ficon">&#128202;</div><div class="fname">Tiered Confidence</div><div class="fdesc">Four tiers from Strong Recommendation to Not Recommended.</div></div>
     </div>
 </div>
 
 <div class="footer">
-    <div class="footer-logo">TibiaMatcher</div>
-    <div class="footer-note">For clinical decision support only. Not a substitute for professional medical judgement.</div>
+    <div class="flogo">TibiaMatcher</div>
+    <div class="fnote">For clinical decision support only. Not a substitute for professional medical judgement.</div>
 </div>
-"""
 
-# ── LANDING ───────────────────────────────────────────────────────────────────
-if st.session_state.page == "landing":
-    st.markdown(LANDING_HTML, unsafe_allow_html=True)
+</body>
+</html>"""
 
-    # Invisible button triggered by the HTML Launch button
-    st.markdown('<div style="display:none">', unsafe_allow_html=True)
-    if st.button("Launch", key="launch_trigger"):
+    components.html(LANDING, height=1900, scrolling=True)
+
+    st.markdown("""
+    <style>
+    div[data-testid="stButton"] {
+        display: flex; justify-content: center; margin-top: 24px; margin-bottom: 40px;
+    }
+    div[data-testid="stButton"] > button {
+        background: #111 !important; color: white !important;
+        border: none !important; border-radius: 100px !important;
+        padding: 18px 56px !important; font-size: 17px !important;
+        font-weight: 500 !important; cursor: pointer !important;
+        letter-spacing: -0.2px !important;
+    }
+    div[data-testid="stButton"] > button:hover {
+        background: #2563EB !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    if st.button("🚀  Launch Tool  →"):
         st.session_state.page = "app"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # JS bridge: click the hidden Streamlit button when HTML button is clicked
-    st.markdown("""
-    <script>
-    const btn = window.parent.document.querySelector('[data-testid="stButton"] button');
-    if(btn) btn.id = "launch-trigger";
-    </script>
-    """, unsafe_allow_html=True)
 
 # ── MAIN APP ──────────────────────────────────────────────────────────────────
 else:
@@ -347,7 +311,9 @@ else:
         lc = labels + [labels[0]]
         vc = values + [values[0]]
         avg = np.mean([v for v in values if v > 0])
-        fc, lcolor = ('rgba(29,158,117,0.35)','#1d9e75') if avg>=70 else (('rgba(186,117,23,0.35)','#ba7517') if avg>=45 else ('rgba(162,45,45,0.35)','#a32d2d'))
+        if avg >= 70:   fc, lcolor = 'rgba(29,158,117,0.35)', '#1d9e75'
+        elif avg >= 45: fc, lcolor = 'rgba(186,117,23,0.35)', '#ba7517'
+        else:           fc, lcolor = 'rgba(162,45,45,0.35)',  '#a32d2d'
         fig = go.Figure()
         fig.add_trace(go.Scatterpolar(r=vc, theta=lc, fill='toself', fillcolor=fc,
             line=dict(color=lcolor, width=2.5), marker=dict(size=7, color=lcolor),
@@ -378,23 +344,28 @@ else:
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=f['age_j'], y=f['angle_j'], mode='markers',
             marker=dict(color='#FF3333',size=8,opacity=0.85,line=dict(color='rgba(0,0,0,0.3)',width=0.5)),
-            name='Failed', hovertemplate='Age: %{customdata[0]}<br>Angulation: %{customdata[1]}°<br><b>Failed</b><extra></extra>',
-            customdata=f[['age','ap_angulation']].values))
+            name='Failed', customdata=f[['age','ap_angulation']].values,
+            hovertemplate='Age: %{customdata[0]}<br>Angulation: %{customdata[1]}°<br><b>Failed</b><extra></extra>'))
         fig.add_trace(go.Scatter(x=s['age_j'], y=s['angle_j'], mode='markers',
             marker=dict(color='#00E676',size=8,opacity=0.75,line=dict(color='rgba(0,0,0,0.3)',width=0.5)),
-            name='Success', hovertemplate='Age: %{customdata[0]}<br>Angulation: %{customdata[1]}°<br><b>Success</b><extra></extra>',
-            customdata=s[['age','ap_angulation']].values))
+            name='Success', customdata=s[['age','ap_angulation']].values,
+            hovertemplate='Age: %{customdata[0]}<br>Angulation: %{customdata[1]}°<br><b>Success</b><extra></extra>'))
         fig.add_trace(go.Scatter(x=[in_age], y=[in_angle], mode='markers',
-            marker=dict(symbol='circle',color='rgba(255,255,255,0.18)',size=42,line=dict(color='rgba(255,255,255,0.5)',width=1.5)),
+            marker=dict(symbol='circle',color='rgba(255,255,255,0.18)',size=42,
+                        line=dict(color='rgba(255,255,255,0.5)',width=1.5)),
             showlegend=False, hoverinfo='skip'))
         fig.add_trace(go.Scatter(x=[in_age], y=[in_angle], mode='markers',
             marker=dict(symbol='star',color='white',size=26,line=dict(color='#111',width=2)),
-            name='Your Patient', hovertemplate=f'<b>Your Patient</b><br>Age: {in_age}<br>Angulation: {in_angle}°<extra></extra>'))
+            name='Your Patient',
+            hovertemplate=f'<b>Your Patient</b><br>Age: {in_age}<br>Angulation: {in_angle}°<extra></extra>'))
         fig.update_layout(
-            xaxis=dict(title='Age',gridcolor='rgba(255,255,255,0.05)',zerolinecolor='rgba(255,255,255,0.08)',tickfont=dict(color='rgba(255,255,255,0.6)')),
-            yaxis=dict(title='AP Angulation (°)',gridcolor='rgba(255,255,255,0.05)',zerolinecolor='rgba(255,255,255,0.08)',tickfont=dict(color='rgba(255,255,255,0.6)')),
+            xaxis=dict(title='Age',gridcolor='rgba(255,255,255,0.05)',
+                       zerolinecolor='rgba(255,255,255,0.08)',tickfont=dict(color='rgba(255,255,255,0.6)')),
+            yaxis=dict(title='AP Angulation (°)',gridcolor='rgba(255,255,255,0.05)',
+                       zerolinecolor='rgba(255,255,255,0.08)',tickfont=dict(color='rgba(255,255,255,0.6)')),
             paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(12,12,18,1)',
-            legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1,font=dict(color='white',size=12),bgcolor='rgba(0,0,0,0)'),
+            legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1,
+                        font=dict(color='white',size=12),bgcolor='rgba(0,0,0,0)'),
             height=460, margin=dict(t=20,b=50,l=60,r=20), dragmode=False)
         return fig, dict(displayModeBar=False)
 
@@ -452,25 +423,28 @@ else:
                 for tn, kw in TREATMENT_KEYWORDS.items():
                     rate, _ = compute_success_rate(df, kw, in_age, in_angle, in_growth, in_weight, in_refracture, in_infection)
                     treatment_rates[tn] = rate
-                    results.append({"Treatment": tn, "Success Rate": f"{rate}%" if rate is not None else "No similar cases", "Proposed": "⭐ Proposed" if tn == in_treatment else ""})
+                    results.append({"Treatment": tn,
+                                    "Success Rate": f"{rate}%" if rate is not None else "No similar cases",
+                                    "Proposed": "⭐ Proposed" if tn == in_treatment else ""})
                 rdf = pd.DataFrame(results)
                 rdf['_sort'] = pd.to_numeric(rdf['Success Rate'].str.replace('%','',regex=False), errors='coerce')
                 rdf = rdf.sort_values('_sort', ascending=False).drop(columns='_sort').reset_index(drop=True)
                 rdf.index += 1
-                nr = [(r['Treatment'], int(r['Success Rate'].replace('%',''))) for r in results if isinstance(r['Success Rate'],str) and '%' in r['Success Rate']]
+                nr = [(r['Treatment'], int(r['Success Rate'].replace('%','')))
+                      for r in results if isinstance(r['Success Rate'],str) and '%' in r['Success Rate']]
                 if nr:
                     bt, br = max(nr, key=lambda x: x[1])
                     if bt != in_treatment:
                         ps = f"{proposed_rate}%" if proposed_rate is not None else "no similar cases"
-                        st.success(f"🏆 **Recommended Treatment: {bt}** — {br}% success rate, outperforming the proposed {in_treatment} ({ps}).")
+                        st.success(f"🏆 **Recommended: {bt}** — {br}% success rate, outperforming {in_treatment} ({ps}).")
                     else:
-                        st.success(f"🏆 **The proposed treatment ({in_treatment}) is already the best option** with a {br}% success rate.")
+                        st.success(f"🏆 **{in_treatment} is already the best option** with {br}% success rate.")
                 else:
                     st.warning("⚠️ No treatments found with sufficiently similar historical cases.")
                 st.dataframe(rdf[['Treatment','Success Rate','Proposed']], use_container_width=True)
                 st.divider()
                 st.header("🕸️ Treatment Success Radar")
-                st.caption("Each axis = a treatment type. Further from center = higher success rate for this patient profile.")
+                st.caption("Each axis = a treatment type. Further from center = higher success rate.")
                 rf, rc = build_radar(treatment_rates)
                 st.plotly_chart(rf, use_container_width=True, config=rc)
         except Exception as e:
