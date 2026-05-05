@@ -27,13 +27,12 @@ if st.session_state.page == "landing":
     [data-testid="stAppViewContainer"] { background: #FAFAF8 !important; }
     [data-testid="stAppViewContainer"] > section { background: #FAFAF8 !important; padding: 0 !important; }
     section[data-testid="stSidebar"] { display: none !important; }
-    /* Make the whole page background match so no white gap shows */
     html, body, [data-testid="stApp"] { background: #FAFAF8 !important; }
-    /* Button centered at bottom */
+    iframe { display: block !important; margin: 0 !important; padding: 0 !important; border: none !important; }
     div[data-testid="stButton"] {
         display: flex; justify-content: center;
-        padding: 24px 0 32px 0;
-        background: #FAFAF8;
+        padding: 24px 0 32px 0; background: #FAFAF8;
+        margin: 0 !important;
     }
     div[data-testid="stButton"] > button {
         background: #111 !important; color: white !important;
@@ -42,18 +41,30 @@ if st.session_state.page == "landing":
         font-weight: 500 !important; cursor: pointer !important;
     }
     div[data-testid="stButton"] > button:hover { background: #2563EB !important; }
-    /* Remove any gap/margin around iframe */
-    iframe { display: block !important; margin: 0 !important; padding: 0 !important; }
-    .stComponentsIframeContainer { margin: 0 !important; padding: 0 !important; }
+    /* Kill all spacing between elements */
+    .element-container { margin: 0 !important; padding: 0 !important; }
+    .stComponentsIframeContainer { line-height: 0 !important; }
     </style>
+
+    <!-- JS: listen for height from iframe and resize it -->
+    <script>
+    window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'setHeight') {
+            var iframes = window.document.querySelectorAll('iframe');
+            iframes.forEach(function(f) {
+                f.style.height = e.data.height + 'px';
+            });
+        }
+    });
+    </script>
     """, unsafe_allow_html=True)
 
     html_path = os.path.join(os.path.dirname(__file__), "landing.html")
     with open(html_path, "r") as f:
         landing_html = f.read()
 
-    # Height set to 2200 to ensure all content fits with no gap
-    components.html(landing_html, height=2200, scrolling=True)
+    # Start with a tall enough height; JS will trim it to exact size
+    components.html(landing_html, height=2400, scrolling=False)
 
     if st.button("🚀  Launch Tool  →", key="launch"):
         st.session_state.page = "app"
@@ -206,7 +217,6 @@ else:
             height=460, margin=dict(t=20,b=50,l=60,r=20), dragmode=False)
         return fig, dict(displayModeBar=False)
 
-    # ── SIDEBAR ───────────────────────────────────────────────────────────────
     st.sidebar.markdown("## 🏥 Patient Profile")
     if st.sidebar.button("← Back to Home"):
         st.session_state.page = "landing"
