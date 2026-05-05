@@ -19,20 +19,51 @@ if "page" not in st.session_state:
 # ── LANDING ───────────────────────────────────────────────────────────────────
 if st.session_state.page == "landing":
 
+    # NUCLEAR OPTION: force EVERY Streamlit container to #FAFAF8
+    # This eliminates any white showing through anywhere
     st.markdown("""
     <style>
-    #MainMenu, header, footer { display: none !important; }
-    .block-container { padding: 0 !important; max-width: 100% !important; }
-    .main .block-container { padding-top: 0 !important; padding-bottom: 0 !important; }
-    [data-testid="stAppViewContainer"] { background: #FAFAF8 !important; }
-    [data-testid="stAppViewContainer"] > section { background: #FAFAF8 !important; padding: 0 !important; }
+    /* Hide all chrome */
+    #MainMenu, header, footer, [data-testid="stToolbar"],
+    [data-testid="stDecoration"], [data-testid="stStatusWidget"] { display: none !important; }
     section[data-testid="stSidebar"] { display: none !important; }
-    html, body, [data-testid="stApp"] { background: #FAFAF8 !important; }
-    iframe { display: block !important; margin: 0 !important; padding: 0 !important; border: none !important; }
+
+    /* Force cream background on EVERYTHING */
+    html, body, [data-testid="stApp"], [data-testid="stAppViewContainer"],
+    [data-testid="stAppViewContainer"] > section, .main, .main > div,
+    .stApp, .block-container, [data-testid="stHeader"],
+    [data-testid="stMain"], section.main {
+        background: #FAFAF8 !important;
+        background-color: #FAFAF8 !important;
+    }
+
+    /* Kill all padding and margins around the iframe */
+    .block-container { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
+    .main .block-container { padding-top: 0 !important; padding-bottom: 0 !important; }
+    .element-container { margin: 0 !important; padding: 0 !important; }
+    [data-testid="stVerticalBlock"] { gap: 0 !important; }
+    [data-testid="stVerticalBlock"] > div { gap: 0 !important; }
+
+    /* iframe styling */
+    iframe { 
+        display: block !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        border: none !important;
+        background: #FAFAF8 !important;
+        width: 100% !important;
+    }
+    .stComponentsIframeContainer, [data-testid="stIFrame"] {
+        margin: 0 !important; padding: 0 !important;
+        background: #FAFAF8 !important;
+        line-height: 0 !important;
+    }
+
+    /* Button container */
     div[data-testid="stButton"] {
         display: flex; justify-content: center;
-        padding: 24px 0 32px 0; background: #FAFAF8;
-        margin: 0 !important;
+        padding: 24px 0 32px 0; margin: 0 !important;
+        background: #FAFAF8 !important;
     }
     div[data-testid="stButton"] > button {
         background: #111 !important; color: white !important;
@@ -41,30 +72,14 @@ if st.session_state.page == "landing":
         font-weight: 500 !important; cursor: pointer !important;
     }
     div[data-testid="stButton"] > button:hover { background: #2563EB !important; }
-    /* Kill all spacing between elements */
-    .element-container { margin: 0 !important; padding: 0 !important; }
-    .stComponentsIframeContainer { line-height: 0 !important; }
     </style>
-
-    <!-- JS: listen for height from iframe and resize it -->
-    <script>
-    window.addEventListener('message', function(e) {
-        if (e.data && e.data.type === 'setHeight') {
-            var iframes = window.document.querySelectorAll('iframe');
-            iframes.forEach(function(f) {
-                f.style.height = e.data.height + 'px';
-            });
-        }
-    });
-    </script>
     """, unsafe_allow_html=True)
 
     html_path = os.path.join(os.path.dirname(__file__), "landing.html")
     with open(html_path, "r") as f:
         landing_html = f.read()
 
-    # Start with a tall enough height; JS will trim it to exact size
-    components.html(landing_html, height=2400, scrolling=False)
+    components.html(landing_html, height=1750, scrolling=False)
 
     if st.button("🚀  Launch Tool  →", key="launch"):
         st.session_state.page = "app"
