@@ -7,9 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 100%; background: #FAFAF8; font-family: "Times new roman", sans-serif; color: #1a1a1a; }
+html, body { width: 100%; background: #FAFAF8; font-family: "DM Sans", sans-serif; color: #1a1a1a; }
 
-/* ── NAV ── */
 .nav {
     display: flex; justify-content: space-between; align-items: center;
     padding: 24px 60px; border-bottom: 1px solid #E8E8E4; background: #FAFAF8;
@@ -18,7 +17,6 @@ html, body { width: 100%; background: #FAFAF8; font-family: "Times new roman", s
 .nav-logo span { color: #2563EB; }
 .nav-tag { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #999; }
 
-/* ── HERO ── */
 .hero {
     display: grid; grid-template-columns: 1fr 1fr;
     padding: 72px 60px; align-items: center; gap: 72px;
@@ -37,17 +35,8 @@ h1 {
 }
 h1 em { font-style: italic; color: #2563EB; }
 .desc { font-size: 16px; font-weight: 300; line-height: 1.75; color: #666; margin-bottom: 32px; }
-.cta-btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: #111; color: white; font-family: "DM Sans", sans-serif;
-    font-size: 16px; font-weight: 500; padding: 16px 40px;
-    border-radius: 100px; border: none; cursor: pointer;
-    transition: all 0.2s; text-decoration: none;
-}
-.cta-btn:hover { background: #2563EB; transform: translateY(-1px); }
-.hint { font-size: 13px; color: #bbb; margin-top: 14px; }
+.hint { font-size: 13px; color: #bbb; margin-top: 12px; }
 
-/* ── CARD ── */
 .card {
     background: white; border: 1px solid #E8E8E4; border-radius: 20px;
     padding: 28px; box-shadow: 0 8px 40px rgba(0,0,0,0.06);
@@ -62,7 +51,6 @@ h1 em { font-style: italic; color: #2563EB; }
 .bar { height: 100%; border-radius: 100px; }
 .rpct { font-size: 12px; font-weight: 600; color: #111; min-width: 32px; text-align: right; }
 
-/* ── STATS ── */
 .stats {
     display: grid; grid-template-columns: repeat(4, 1fr);
     padding: 60px 60px; gap: 40px; border-top: 1px solid #E8E8E4; background: #FAFAF8;
@@ -74,7 +62,6 @@ h1 em { font-style: italic; color: #2563EB; }
 .snum b { color: #2563EB; }
 .slabel { font-size: 13px; color: #999; line-height: 1.6; }
 
-/* ── FEATURES ── */
 .features { background: #111; padding: 80px 60px; }
 .fhdr { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
 .ftitle { font-family: "Playfair Display", serif; font-size: 40px; font-weight: 700; color: white; line-height: 1.1; letter-spacing: -1px; }
@@ -91,49 +78,13 @@ h1 em { font-style: italic; color: #2563EB; }
 .fname { font-size: 14px; font-weight: 600; color: white; margin-bottom: 8px; }
 .fdesc { font-size: 12px; color: #555; line-height: 1.65; }
 
-/* ── FOOTER ── */
 .footer {
     display: flex; justify-content: space-between; align-items: center;
     padding: 32px 60px; border-top: 1px solid #E8E8E4; background: #FAFAF8;
 }
 .flogo { font-family: "Playfair Display", serif; font-size: 14px; color: #bbb; font-weight: 700; }
 .fnote { font-size: 11px; color: #ccc; }
-
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.hero, .stats, .features { animation: fadeUp 0.7s ease both; }
 </style>
-
-<script>
-/* Strip Streamlit padding from parent so iframe fills the page cleanly */
-(function stripParentPadding() {
-    function apply() {
-        try {
-            var p = window.parent.document;
-            var el = p.getElementById('st-landing-fix');
-            if (!el) { el = p.createElement('style'); el.id = 'st-landing-fix'; p.head.appendChild(el); }
-            el.textContent =
-                '.main .block-container { padding-top: 0 !important; padding-bottom: 0 !important; }' +
-                '.block-container { padding: 0 !important; max-width: 100% !important; }' +
-                '[data-testid="stAppViewContainer"] > section { padding-top: 0 !important; }' +
-                'iframe { display: block !important; }';
-        } catch(e) {}
-    }
-    apply();
-    setTimeout(apply, 100);
-    setTimeout(apply, 500);
-})();
-
-function launchApp() {
-    /* Click the hidden Streamlit launch button */
-    try {
-        var btn = window.parent.document.querySelector('[data-testid="stButton"] button');
-        if (btn) btn.click();
-    } catch(e) {}
-}
-</script>
 </head>
 <body>
 
@@ -147,8 +98,7 @@ function launchApp() {
         <div class="tag"><span class="tag-dot"></span>Orthopaedic Intelligence</div>
         <h1>Find the right<br>treatment, <em>faster.</em></h1>
         <p class="desc">A data-driven case matcher for tibia fractures. Enter a patient profile and instantly surface the five most similar historical cases — with treatment success rates, clinical comparisons, and visual insights.</p>
-        <button class="cta-btn" onclick="launchApp()">Launch Tool &rarr;</button>
-        <p class="hint">2,800+ historical cases &middot; Results in under 2 seconds</p>
+        <p class="hint">&#8595; Click Launch Tool below to begin</p>
     </div>
     <div>
         <div class="card">
@@ -189,6 +139,18 @@ function launchApp() {
     <div class="flogo">TibiaMatcher</div>
     <div class="fnote">For clinical decision support only. Not a substitute for professional medical judgement.</div>
 </div>
+
+<script>
+// Tell the parent iframe exactly how tall this page is, so it resizes perfectly
+function sendHeight() {
+    var h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+}
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+setTimeout(sendHeight, 300);
+setTimeout(sendHeight, 800);
+</script>
 
 </body>
 </html>
