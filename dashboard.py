@@ -10,7 +10,6 @@ URL = "https://sojkgoaefkgtnxmhkptz.supabase.co"
 KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvamtnb2FlZmtndG54bWhrcHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTYxMjIsImV4cCI6MjA5MDE5MjEyMn0.Ev1EmLOpdcVzj6Jcpsuv9m7z_3ybYowodU2yc7abpyQ"
 supabase = create_client(URL, KEY)
 
-# Sidebar collapsed on landing, expanded on app
 sidebar_state = "collapsed" if st.session_state.get("page", "landing") == "landing" else "expanded"
 st.set_page_config(page_title="Precision Tibia Case Matcher", layout="wide", initial_sidebar_state=sidebar_state)
 
@@ -24,10 +23,18 @@ if st.session_state.page == "landing":
     <style>
     #MainMenu, header, footer { display: none !important; }
     .block-container { padding: 0 !important; max-width: 100% !important; }
-    .main .block-container { padding-top: 0 !important; }
+    .main .block-container { padding-top: 0 !important; padding-bottom: 0 !important; }
     [data-testid="stAppViewContainer"] { background: #FAFAF8 !important; }
+    [data-testid="stAppViewContainer"] > section { background: #FAFAF8 !important; padding: 0 !important; }
     section[data-testid="stSidebar"] { display: none !important; }
-    div[data-testid="stButton"] { display: flex; justify-content: center; margin-top: 20px; margin-bottom: 40px; }
+    /* Make the whole page background match so no white gap shows */
+    html, body, [data-testid="stApp"] { background: #FAFAF8 !important; }
+    /* Button centered at bottom */
+    div[data-testid="stButton"] {
+        display: flex; justify-content: center;
+        padding: 24px 0 32px 0;
+        background: #FAFAF8;
+    }
     div[data-testid="stButton"] > button {
         background: #111 !important; color: white !important;
         border: none !important; border-radius: 100px !important;
@@ -35,6 +42,9 @@ if st.session_state.page == "landing":
         font-weight: 500 !important; cursor: pointer !important;
     }
     div[data-testid="stButton"] > button:hover { background: #2563EB !important; }
+    /* Remove any gap/margin around iframe */
+    iframe { display: block !important; margin: 0 !important; padding: 0 !important; }
+    .stComponentsIframeContainer { margin: 0 !important; padding: 0 !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -42,7 +52,8 @@ if st.session_state.page == "landing":
     with open(html_path, "r") as f:
         landing_html = f.read()
 
-    components.html(landing_html, height=1900, scrolling=True)
+    # Height set to 2200 to ensure all content fits with no gap
+    components.html(landing_html, height=2200, scrolling=True)
 
     if st.button("🚀  Launch Tool  →", key="launch"):
         st.session_state.page = "app"
@@ -55,7 +66,6 @@ else:
     #MainMenu, footer { display: none !important; }
     [data-testid="stAppViewContainer"] { background: #0d0d14; }
     [data-testid="stSidebar"] { background: #13131f; border-right: 1px solid #1e1e2e; }
-    /* Prevent title from being clipped */
     .block-container { padding-top: 2rem !important; }
     </style>
     """, unsafe_allow_html=True)
@@ -217,7 +227,6 @@ else:
     st.sidebar.markdown("---")
     analyze = st.sidebar.button("🔍 Analyze Similar Cases", use_container_width=True)
 
-    # ── MAIN AREA ─────────────────────────────────────────────────────────────
     st.title("🏥 Precision Tibia Case Matcher")
     st.caption("Set the patient profile in the sidebar and click **Analyze Similar Cases** to begin.")
     st.divider()
