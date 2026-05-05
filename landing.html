@@ -7,7 +7,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 100%; background: #FAFAF8; font-family: "DM Sans", sans-serif; color: #1a1a1a; }
+
+/* CRITICAL: html and body must fill the iframe completely
+   Otherwise the iframe's default white background shows below the content. */
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    background: #FAFAF8 !important;
+    font-family: "DM Sans", sans-serif;
+    color: #1a1a1a;
+}
 
 .nav {
     display: flex; justify-content: space-between; align-items: center;
@@ -20,6 +29,7 @@ html, body { width: 100%; background: #FAFAF8; font-family: "DM Sans", sans-seri
 .hero {
     display: grid; grid-template-columns: 1fr 1fr;
     padding: 72px 60px; align-items: center; gap: 72px;
+    background: #FAFAF8;
 }
 .tag {
     display: inline-flex; align-items: center; gap: 8px;
@@ -139,18 +149,6 @@ h1 em { font-style: italic; color: #2563EB; }
     <div class="flogo">TibiaMatcher</div>
     <div class="fnote">For clinical decision support only. Not a substitute for professional medical judgement.</div>
 </div>
-
-<script>
-// Tell the parent iframe exactly how tall this page is, so it resizes perfectly
-function sendHeight() {
-    var h = document.documentElement.scrollHeight;
-    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
-}
-window.addEventListener('load', sendHeight);
-window.addEventListener('resize', sendHeight);
-setTimeout(sendHeight, 300);
-setTimeout(sendHeight, 800);
-</script>
 
 </body>
 </html>
