@@ -21,16 +21,13 @@ if st.session_state.page == "landing":
 
     st.markdown("""
     <style>
-    /* Hide chrome */
+    /* Hide chrome and sidebar */
     #MainMenu, header, footer, [data-testid="stToolbar"],
     [data-testid="stDecoration"], [data-testid="stStatusWidget"] { display: none !important; }
     section[data-testid="stSidebar"] { display: none !important; }
 
-    /* Force background everywhere using universal selector */
-    *:not(button):not(.bar):not(.card):not(.fc):not(.cdot):not(.tag):not(.tag-dot) {
-        background-color: transparent;
-    }
-    html, body, #root, [data-testid="stApp"], [data-testid="stAppViewContainer"],
+    /* Force cream everywhere */
+    html, body, [data-testid="stApp"], [data-testid="stAppViewContainer"],
     [data-testid="stAppViewContainer"] > section, .main, .stApp,
     [data-testid="stMain"], section.main, [data-testid="stHeader"],
     .block-container, [data-testid="stMainBlockContainer"] {
@@ -38,14 +35,12 @@ if st.session_state.page == "landing":
         background-color: #FAFAF8 !important;
     }
 
-    /* Zero out spacing */
+    /* Zero spacing */
     .block-container { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
-    .main .block-container { padding: 0 !important; }
     .element-container { margin: 0 !important; padding: 0 !important; }
     [data-testid="stVerticalBlock"] { gap: 0 !important; }
-    [data-testid="stVerticalBlock"] > div { gap: 0 !important; margin: 0 !important; padding: 0 !important; }
 
-    /* iframe fully blends */
+    /* Iframe blends in seamlessly */
     iframe {
         display: block !important;
         margin: 0 !important;
@@ -53,7 +48,6 @@ if st.session_state.page == "landing":
         border: none !important;
         background: #FAFAF8 !important;
         width: 100% !important;
-        color-scheme: light !important;
     }
     [data-testid="stIFrame"], .stComponentsIframeContainer {
         margin: 0 !important; padding: 0 !important;
@@ -61,48 +55,25 @@ if st.session_state.page == "landing":
         line-height: 0 !important;
     }
 
-    /* Button area */
+    /* HIDE the launch button — user clicks the HTML one inside the iframe instead */
     div[data-testid="stButton"] {
-        display: flex; justify-content: center;
-        padding: 24px 0 32px 0; margin: 0 !important;
-        background: #FAFAF8 !important;
+        position: absolute !important;
+        left: -9999px !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
-    div[data-testid="stButton"] > button {
-        background: #111 !important; color: white !important;
-        border: none !important; border-radius: 100px !important;
-        padding: 18px 56px !important; font-size: 17px !important;
-        font-weight: 500 !important; cursor: pointer !important;
-    }
-    div[data-testid="stButton"] > button:hover { background: #2563EB !important; }
     </style>
-
-    <script>
-    // Belt and suspenders: also set background via JS in case CSS specificity loses
-    (function() {
-        function paint() {
-            ['html','body'].forEach(function(s){
-                var el = document.querySelector(s);
-                if (el) el.style.background = '#FAFAF8';
-            });
-            document.querySelectorAll('[data-testid], .main, .stApp, .block-container').forEach(function(el){
-                el.style.background = '#FAFAF8';
-            });
-        }
-        paint();
-        setTimeout(paint, 100);
-        setTimeout(paint, 500);
-        setTimeout(paint, 1500);
-    })();
-    </script>
     """, unsafe_allow_html=True)
 
     html_path = os.path.join(os.path.dirname(__file__), "landing.html")
     with open(html_path, "r") as f:
         landing_html = f.read()
 
-    components.html(landing_html, height=1750, scrolling=False)
+    # Iframe height reduced to fit content exactly
+    components.html(landing_html, height=1700, scrolling=False)
 
-    if st.button("🚀  Launch Tool  →", key="launch"):
+    # Hidden Streamlit button — triggered by the HTML launch button via JS
+    if st.button("LAUNCH_HIDDEN", key="launch"):
         st.session_state.page = "app"
         st.rerun()
 
