@@ -19,47 +19,49 @@ if "page" not in st.session_state:
 # ── LANDING ───────────────────────────────────────────────────────────────────
 if st.session_state.page == "landing":
 
-    # NUCLEAR OPTION: force EVERY Streamlit container to #FAFAF8
-    # This eliminates any white showing through anywhere
     st.markdown("""
     <style>
-    /* Hide all chrome */
+    /* Hide chrome */
     #MainMenu, header, footer, [data-testid="stToolbar"],
     [data-testid="stDecoration"], [data-testid="stStatusWidget"] { display: none !important; }
     section[data-testid="stSidebar"] { display: none !important; }
 
-    /* Force cream background on EVERYTHING */
-    html, body, [data-testid="stApp"], [data-testid="stAppViewContainer"],
-    [data-testid="stAppViewContainer"] > section, .main, .main > div,
-    .stApp, .block-container, [data-testid="stHeader"],
-    [data-testid="stMain"], section.main {
+    /* Force background everywhere using universal selector */
+    *:not(button):not(.bar):not(.card):not(.fc):not(.cdot):not(.tag):not(.tag-dot) {
+        background-color: transparent;
+    }
+    html, body, #root, [data-testid="stApp"], [data-testid="stAppViewContainer"],
+    [data-testid="stAppViewContainer"] > section, .main, .stApp,
+    [data-testid="stMain"], section.main, [data-testid="stHeader"],
+    .block-container, [data-testid="stMainBlockContainer"] {
         background: #FAFAF8 !important;
         background-color: #FAFAF8 !important;
     }
 
-    /* Kill all padding and margins around the iframe */
+    /* Zero out spacing */
     .block-container { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
-    .main .block-container { padding-top: 0 !important; padding-bottom: 0 !important; }
+    .main .block-container { padding: 0 !important; }
     .element-container { margin: 0 !important; padding: 0 !important; }
     [data-testid="stVerticalBlock"] { gap: 0 !important; }
-    [data-testid="stVerticalBlock"] > div { gap: 0 !important; }
+    [data-testid="stVerticalBlock"] > div { gap: 0 !important; margin: 0 !important; padding: 0 !important; }
 
-    /* iframe styling */
-    iframe { 
-        display: block !important; 
-        margin: 0 !important; 
-        padding: 0 !important; 
+    /* iframe fully blends */
+    iframe {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
         border: none !important;
         background: #FAFAF8 !important;
         width: 100% !important;
+        color-scheme: light !important;
     }
-    .stComponentsIframeContainer, [data-testid="stIFrame"] {
+    [data-testid="stIFrame"], .stComponentsIframeContainer {
         margin: 0 !important; padding: 0 !important;
         background: #FAFAF8 !important;
         line-height: 0 !important;
     }
 
-    /* Button container */
+    /* Button area */
     div[data-testid="stButton"] {
         display: flex; justify-content: center;
         padding: 24px 0 32px 0; margin: 0 !important;
@@ -73,6 +75,25 @@ if st.session_state.page == "landing":
     }
     div[data-testid="stButton"] > button:hover { background: #2563EB !important; }
     </style>
+
+    <script>
+    // Belt and suspenders: also set background via JS in case CSS specificity loses
+    (function() {
+        function paint() {
+            ['html','body'].forEach(function(s){
+                var el = document.querySelector(s);
+                if (el) el.style.background = '#FAFAF8';
+            });
+            document.querySelectorAll('[data-testid], .main, .stApp, .block-container').forEach(function(el){
+                el.style.background = '#FAFAF8';
+            });
+        }
+        paint();
+        setTimeout(paint, 100);
+        setTimeout(paint, 500);
+        setTimeout(paint, 1500);
+    })();
+    </script>
     """, unsafe_allow_html=True)
 
     html_path = os.path.join(os.path.dirname(__file__), "landing.html")
